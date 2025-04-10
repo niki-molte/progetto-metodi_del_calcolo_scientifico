@@ -1,10 +1,16 @@
 import numpy as np
 
+from core.conjugated_gradient import ConjugatedGradientMethod
 from core.gauss_siedl import GaussSiedlMethod
+from core.gradient import GradientMethod
 from core.jacobi import JacobiMethod
 
 toll = 1.e-10
-solver = GaussSiedlMethod()
+
+
+
+
+solver = ConjugatedGradientMethod()
 
 A = solver.load("matrix/vem2.mtx")
 #A = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 1]])
