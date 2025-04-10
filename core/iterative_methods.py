@@ -17,7 +17,7 @@ from core.results import Results
 class IterativeMethods(ABC):
 
     @abstractmethod
-    def solve(self, A: NDArray[np.float64], b: NDArray[np.float64], x_0: NDArray[np.float64], x_ex: NDArray[np.float64],
+    def solve(self, A: NDArray[np.float64], b: NDArray[np.float64], x_ex: NDArray[np.float64],
               n_max: int, toll: float, matrix_name: str) -> Results:
         pass
 

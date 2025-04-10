@@ -14,5 +14,5 @@ x_ex = np.ones(shape=(m, 1))
 b = np.dot(A, x_ex)
 x_0 = np.zeros(shape=(m, 1))
 
-res = solver.solve(A, b, x_0, x_ex, 20000, toll, 'vem2')
+res = solver.solve(A, b, x_ex, 20000, toll, 'vem2')
 print(res.__str__())

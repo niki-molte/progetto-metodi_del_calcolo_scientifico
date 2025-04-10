@@ -1,21 +1,20 @@
 import time
 
+from numpy.typing import NDArray
 import numpy as np
-from numpy._typing import NDArray
 
-from dataclasses import field, dataclass
+from dataclasses import dataclass
 
 from core.iterative_methods import IterativeMethods
 from core.results import Results
 
 
-@dataclass
 class JacobiMethod(IterativeMethods):
 
     def __init__(self):
         pass
 
-    def solve(self, A: NDArray[np.float64], b: NDArray[np.float64], x_0: NDArray[np.float64],
+    def solve(self, A: NDArray[np.float64], b: NDArray[np.float64],
               x_ex: NDArray[np.float64], n_max: int, toll: float, matrix_name: str) -> Results:
 
         # verifica la convergenza del metodo
@@ -49,7 +48,7 @@ class JacobiMethod(IterativeMethods):
 
         # applico il metodo di jacobi per calcolare la
         # soluzione del sistema.
-        while self.check_iteration(A, x_new, b) > toll and nit < nmax:
+        while self.check_iteration(A, x_new, b) > toll and nit < n_max:
             x_old = x_new
 
             x_new = np.dot(invD, (b + np.dot(B, x_old)))
