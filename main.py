@@ -1,12 +1,13 @@
 import numpy as np
 
+from core.gauss_siedl import GaussSiedlMethod
 from core.jacobi import JacobiMethod
 
 toll = 1.e-10
-solver = JacobiMethod()
+solver = GaussSiedlMethod()
 
-# A = solver.load("matrix/vem2.mtx")
-A = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 1]])
+A = solver.load("matrix/vem2.mtx")
+#A = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 1]])
 
 m, n = np.shape(A)
 x_ex = np.ones(shape=(m, 1))

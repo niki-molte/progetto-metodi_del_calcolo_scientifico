@@ -1,14 +1,13 @@
-import json
 import os
-import time
-from abc import ABC, abstractmethod
-
-import numpy
-from numpy.linalg import norm
-from scipy.io import mmread
+import json
 
 import numpy as np
+from numpy.linalg import norm
 from numpy.typing import NDArray
+
+from abc import ABC, abstractmethod
+
+from scipy.io import mmread
 from scipy.linalg import issymmetric, cholesky, LinAlgError
 
 from core.results import Results
@@ -35,7 +34,7 @@ class IterativeMethods(ABC):
         return norm(np.dot(A, x_new) - b) / norm(b)
 
     @staticmethod
-    def evaluate_error(x_ex: NDArray, x_new: NDArray) -> numpy.float64:
+    def evaluate_error(x_ex: NDArray, x_new: NDArray) -> np.float64:
         return norm(x_ex - x_new) / norm(x_ex)
 
     @staticmethod
@@ -49,7 +48,7 @@ class IterativeMethods(ABC):
         # allora il metodo non è applicabile
         if m != n:
             conv = False
-            raise ValueError("The input matrix should be squared")
+            msg = "The input matrix should be squared"
 
         # se la matrice non ha le entry della
         # diagonale maggiori di 0 (1e-10)
@@ -57,14 +56,14 @@ class IterativeMethods(ABC):
         D = np.diag(A)
         if not np.all(D > 1e-10):
             conv = False
-            raise ValueError("The entries of the diagonal should be grather than 0.0")
+            msg = "The entries of the diagonal should be greater than 0.0"
 
         # se la matrice A non è simmetrica
         # allora il metodo non è applicabile
         # rtol è l'errore relativo
         if not issymmetric(A, rtol=1e-10):
             conv = False
-            raise ValueError("The input matrix should be symmetric")
+            msg = "The input matrix should be symmetric"
 
         # se la matrice A non è definita
         # positivamente il metodo di risoluzione
@@ -74,6 +73,7 @@ class IterativeMethods(ABC):
             cholesky(A, lower=True, check_finite=True)
         except LinAlgError:
             conv = False
+            msg = "The input matrix should be positivie defined"
 
         return conv, msg
 
@@ -83,7 +83,7 @@ class IterativeMethods(ABC):
         # se il path specificato non esiste viene 
         # lanciata l'eccezione
         if not os.path.exists(path):
-            raise FileNotFoundError(f"Could not find file '{path}'")
+            raise FileNotFoundError(f"Could not find the file '{path}'")
 
         # carico i dati presenti nel JSON
         with open(path, 'r') as f:
@@ -98,7 +98,7 @@ class IterativeMethods(ABC):
                 "time": res.tim
             }
         }
-        
+
         # aggiunge i dati nel dizionario
         # corretto
         if method_name in data:
