@@ -69,9 +69,6 @@ class ConjugatedGradientMethod(IterativeMethods):
         stop = time.time()
         elapsed_time = stop - start
 
-
-        print(beta)
-
         # calcolo l'errore dell'ultimo run
         err = self.evaluate_error(x_ex, x_new)
 
