@@ -11,6 +11,10 @@ from core.results import Results
 
 class JacobiMethod(IterativeMethods):
 
+    @property
+    def name(self) -> str:
+        return "jacobi"
+
     def __init__(self):
         pass
 
@@ -64,6 +68,6 @@ class JacobiMethod(IterativeMethods):
 
         # salvo le statistiche e genero il valore
         # di ritorno della funzione
-        res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll)
+        res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m)
         self.save_stats(res, "data/computation.json", "jacobi", matrix_name)
         return res

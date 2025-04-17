@@ -10,6 +10,10 @@ from core.results import Results
 
 class GaussSiedlMethod(IterativeMethods):
 
+    @property
+    def name(self) -> str:
+        return "gauss-siedl"
+
     def solve(self, A: NDArray[np.float64], b: NDArray[np.float64], x_ex: NDArray[np.float64], n_max: int, toll: float,
               matrix_name: str) -> Results:
 
@@ -60,7 +64,7 @@ class GaussSiedlMethod(IterativeMethods):
 
         # salvo le statistiche e genero il valore
         # di ritorno della funzione
-        res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll)
+        res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m)
         self.save_stats(res, "data/computation.json", "gauss-siedl", matrix_name)
         return res
 

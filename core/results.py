@@ -7,12 +7,15 @@ class Results:
     _err: float = field(init=False, repr=False)
     _tol: float = field(init=False, repr=False)
     _tim: float = field(init=False, repr=False)
+    _dim: int = field(init=False, repr=False)
 
-    def __init__(self, nit, err, tol, tim):
+    def __init__(self, nit, err, tol, tim, dim):
         self._nit = nit
         self._err = err
         self._tol = tol
         self._tim = tim
+        self._dim = dim
+
 
     @property
     def nit(self) -> int:
@@ -53,9 +56,20 @@ class Results:
             raise ValueError("value should be a positive float.")
         self._tim = float(value)
 
+    @property
+    def dim(self) -> float:
+        return self._dim
+
+    @dim.setter
+    def dim(self, value: int):
+        if not isinstance(value, int) and value < 0:
+            raise ValueError("value should be a positive integer.")
+        self._tim = float(value)
+
     def __str__(self) -> str:
         return f"Results(number of iteration={self.nit}, \n " \
-               f"       error={self.err:.15e}, \n" \
-               f"        tolerance={self.tol:.15e}, \n" \
-               f"        time={self.tim:.15e} seconds \n" \
+               f"       error={self.err:.16e}, \n" \
+               f"        tolerance={self.tol:.16e}, \n" \
+               f"        matrix dim={self.dim:.0e}, \n" \
+               f"        time={self.tim:.16} seconds \n" \
                f")"

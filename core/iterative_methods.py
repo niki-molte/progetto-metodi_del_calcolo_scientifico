@@ -15,6 +15,12 @@ from core.results import Results
 
 class IterativeMethods(ABC):
 
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """nome del metodo (da definire nella sottoclasse)"""
+        pass
+
     @abstractmethod
     def solve(self, A: NDArray[np.float64], b: NDArray[np.float64], x_ex: NDArray[np.float64],
               n_max: int, toll: float, matrix_name: str) -> Results:
@@ -22,6 +28,13 @@ class IterativeMethods(ABC):
 
     @staticmethod
     def load(path: str) -> NDArray:
+
+        # controllo che il file in input esista
+        # davvero, se non c'è allora viene lanciato
+        # un errore
+        if not os.path.isfile(path):
+            raise FileNotFoundError("The specified file in path don't exists")
+
         matrix = mmread(path)
 
         if hasattr(matrix, 'todense'):
@@ -95,7 +108,8 @@ class IterativeMethods(ABC):
                 "niter": res.nit,
                 "err": res.err,
                 "tol": res.tol,
-                "time": res.tim
+                "time": res.tim,
+                "dim": res.dim
             }
         }
 
