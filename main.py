@@ -9,7 +9,7 @@ import json
 
 import numpy as np
 import pandas as pd
-from Tools.scripts.verify_ensurepip_wheels import print_error
+
 
 from core.chart import chart
 from core.conjugated_gradient import ConjugatedGradientMethod
@@ -26,7 +26,7 @@ def parse_input():
     # specificato verranno risolti i sistemi
     # riguardanti spa1, spa2, vem1, vem2 presenti
     # nella cartella matrix
-    arg.add_argument('--path', '-p', type=str, required=False,
+    arg.add_argument('--path', '-p', nargs='+', type=str, required=False,
                      default=['matrix/spa1.mtx',
                               'matrix/spa2.mtx',
                               'matrix/vem1.mtx',
@@ -98,11 +98,20 @@ def parse_input():
     # argomenti
     matrix_path = args_dict.get('path')
 
+    # se specifico un solo path viene intepretato
+    # come lista di stringhe e non come lista di
+    # caratteri
+    if isinstance(matrix_path, str):
+        matrix_path = [matrix_path]
+
     # genero il nome della matrice prendendo l'ultimo
     # campo dopo il backslash se ho specificato anche
     # una directory, altrimenti matrix_name è matrix_path
-    matrix_name = os.path.basename(matrix_path)
-    matrix_name = os.path.splitext(matrix_name)[0]
+    matrix_name = []
+
+    for p in matrix_path:
+        mn = os.path.basename(p)
+        matrix_name.append(os.path.splitext(mn)[0])
 
 
     # prendo i metodi dati in input e riempio
@@ -170,34 +179,45 @@ def parse_input():
 
 def main(path, name, solver, tollerance, niteration, nrun, run_charts, statistics, verbose):
 
-    A = IterativeMethods.load(path)
-    matrix_name = name
-
-    m, n = np.shape(A)
-    x_ex = np.ones(shape=(m, 1))
-
-    b = np.dot(A, x_ex)
-    x_0 = np.zeros(shape=(m, 1))
-
     # dataframe che contiene tutti i risultati
     # dei run eseguiti nell'istanza del programma
     res_dataframe = pd.DataFrame(columns=['matrix', 'dim', 'method', 'niter', 'err', 'tol', 'time'])
 
 
-    # esecuzione di ciascun solver in base ai
-    # parametri impostati
-    for t in range(len(tollerance)):
-        for s in solver:
-            for r in range(nrun):
-                tol = tollerance[t]
-                res = s.solve(A, b, x_ex, niteration, tol, matrix_name)
-                res_dataframe.loc[len(res_dataframe)] = [matrix_name, res.dim, s.name, res.nit, res.err, res.tol, res.tim]
+    # per ogni valore di tolleranza impostato
+    # viene caricata la matrice ed eseguiti i
+    # solver
+    for tol in tollerance:
 
-                # se verbose è impostato vengono stampate
-                # tutte i risultati di ciascun run
-                if verbose:
-                    print(f"Running {s.name} on {matrix_name} - Iteration {r + 1}/{nrun}")
-                    print(res.__str__(), '\n')
+        # per ciascuna matrice in termini di
+        # nome e path
+        for pt, nm in zip(path, name):
+
+            A = IterativeMethods.load(pt)
+            matrix_name = nm
+
+            m, n = np.shape(A)
+            x_ex = np.ones(shape=(m, 1))
+
+            b = np.dot(A, x_ex)
+
+            # per ciascun solver specificato
+            # viene eseguito il metodo
+            for s in solver:
+
+                # per ciascun numero di run definito
+                # viene iterato il metodo selezionato
+                for r in range(nrun):
+                    res = s.solve(A, b, x_ex, niteration, tol, matrix_name)
+                    res_dataframe.loc[len(res_dataframe)] = [matrix_name, res.dim, s.name, res.nit, res.err, res.tol, res.tim]
+
+                    # se verbose è impostato vengono stampate
+                    # tutte i risultati di ciascun run
+                    if verbose:
+                        print(f"Running {s.name} on {matrix_name} - Iteration {r + 1}/{nrun}")
+                        print(res.__str__(), '\n')
+
+    # grafici se richiesti
 
 
 
