@@ -7,6 +7,7 @@ import pandas as pd
 class chart():
 
     def __init__(self):
+        print("")
         pass
 
     def make_run_chart(self,  run_stats: pd.DataFrame):
