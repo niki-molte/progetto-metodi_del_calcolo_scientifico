@@ -2,7 +2,6 @@
 # gli argomenti passati all'avvio del
 # programma
 import os.path
-import sys
 import argparse
 
 import json
@@ -27,11 +26,7 @@ def parse_input():
     # riguardanti spa1, spa2, vem1, vem2 presenti
     # nella cartella matrix
     arg.add_argument('--path', '-p', nargs='+', type=str, required=False,
-                     default=['matrix/spa1.mtx',
-                              'matrix/spa2.mtx',
-                              'matrix/vem1.mtx',
-                              'matrix/vem2.mtx'],
-                     help='Please specify the path of the .mtx file. The default systems are: \n'
+                     help='Please specify the path of the .mtx file. The default matrix in matrix/ are: \n'
                           '    spa1 \n'
                           '    spa2 \n'
                           '    vem1 \n'
@@ -109,9 +104,12 @@ def parse_input():
     # una directory, altrimenti matrix_name è matrix_path
     matrix_name = []
 
-    for p in matrix_path:
-        mn = os.path.basename(p)
-        matrix_name.append(os.path.splitext(mn)[0])
+    # se è stato specificato un path prendo i nomi delle
+    # matrici
+    if matrix_path is not None:
+        for p in matrix_path:
+            mn = os.path.basename(p)
+            matrix_name.append(os.path.splitext(mn)[0])
 
 
     # prendo i metodi dati in input e riempio
@@ -183,48 +181,56 @@ def main(path, name, solver, tollerance, niteration, nrun, run_charts, statistic
     # dei run eseguiti nell'istanza del programma
     res_dataframe = pd.DataFrame(columns=['matrix', 'dim', 'method', 'niter', 'err', 'tol', 'time'])
 
+    # se è stato specificato il path calcolo la
+    # matrice
+    if path is not None:
+        # per ogni valore di tolleranza impostato
+        # viene caricata la matrice ed eseguiti i
+        # solver
+        for tol in tollerance:
 
-    # per ogni valore di tolleranza impostato
-    # viene caricata la matrice ed eseguiti i
-    # solver
-    for tol in tollerance:
+            # per ciascuna matrice in termini di
+            # nome e path
+            for pt, nm in zip(path, name):
 
-        # per ciascuna matrice in termini di
-        # nome e path
-        for pt, nm in zip(path, name):
+                A = IterativeMethods.load(pt)
+                matrix_name = nm
 
-            A = IterativeMethods.load(pt)
-            matrix_name = nm
+                m, n = np.shape(A)
+                x_ex = np.ones(shape=(m, 1))
 
-            m, n = np.shape(A)
-            x_ex = np.ones(shape=(m, 1))
+                b = np.dot(A, x_ex)
 
-            b = np.dot(A, x_ex)
+                # per ciascun solver specificato
+                # viene eseguito il metodo
+                for s in solver:
 
-            # per ciascun solver specificato
-            # viene eseguito il metodo
-            for s in solver:
+                    # per ciascun numero di run definito
+                    # viene iterato il metodo selezionato
+                    for r in range(nrun):
+                        res = s.solve(A, b, x_ex, niteration, tol, matrix_name)
+                        res_dataframe.loc[len(res_dataframe)] = [matrix_name, res.dim, s.name, res.nit, res.err, res.tol, res.tim]
 
-                # per ciascun numero di run definito
-                # viene iterato il metodo selezionato
-                for r in range(nrun):
-                    res = s.solve(A, b, x_ex, niteration, tol, matrix_name)
-                    res_dataframe.loc[len(res_dataframe)] = [matrix_name, res.dim, s.name, res.nit, res.err, res.tol, res.tim]
-
-                    # se verbose è impostato vengono stampate
-                    # tutte i risultati di ciascun run
-                    if verbose:
-                        print(f"Running {s.name} on {matrix_name} - Iteration {r + 1}/{nrun}")
-                        print(res.__str__(), '\n')
+                        # se verbose è impostato vengono stampate
+                        # tutte i risultati di ciascun run
+                        if verbose:
+                            print(f"Running {s.name} on {matrix_name} - Iteration {r + 1}/{nrun}")
+                            print(res.__str__(), '\n')
 
     # grafici se richiesti
+    if do_charts:
+        make_charts = chart()
+        make_charts.make_run_chart(res_dataframe)
+
+    if do_stats:
+        make_charts = chart()
+        make_charts.make_stats()
+        pass
 
 
 
 
 
-    #make_charts = chart()
-    #make_charts.make_run_chart(res_dataframe)
 
 
 if __name__ == "__main__":
