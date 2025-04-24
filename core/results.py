@@ -12,14 +12,13 @@ class Results:
     _mep: float = field(init=False, repr=False)
 
     def __init__(self, nit, err, tol, tim, dim, mem, mep):
-        self._nit = nit
-        self._err = err
-        self._tol = tol
-        self._tim = tim
-        self._dim = dim
-        self._mem = mem
-        self._mep = mep
-
+        self.nit = nit
+        self.err = err
+        self.tol = tol
+        self.tim = tim
+        self.dim = dim
+        self.mem = mem / 1024
+        self.mep = mep / 1024
 
     @property
     def nit(self) -> int:
@@ -47,7 +46,7 @@ class Results:
 
     @tol.setter
     def tol(self, value: float):
-        if not isinstance(value, float) and value < 0:
+        if not isinstance(value, float) or value < 0:
             raise ValueError("value should be a positive float")
         self._tol = value
 
@@ -57,7 +56,7 @@ class Results:
 
     @tim.setter
     def tim(self, value: float):
-        if not isinstance(value, float) and value < 0:
+        if not isinstance(value, float) or value < 0:
             raise ValueError("value should be a positive float.")
         self._tim = value
 
@@ -67,7 +66,7 @@ class Results:
 
     @dim.setter
     def dim(self, value: int):
-        if not isinstance(value, int) and value < 0:
+        if not isinstance(value, int) or value < 0:
             raise ValueError("value should be a positive integer.")
         self._dim = value
 
@@ -77,7 +76,7 @@ class Results:
 
     @mem.setter
     def mem(self, value: float):
-        if not isinstance(value, float) and value < 0:
+        if not isinstance(value, float) or value < 0:
             raise ValueError("value should be a positive float.")
         self._mem = value
 
@@ -95,9 +94,9 @@ class Results:
         return (f"Results(\n "
                 f"       number of iteration={self.nit}, \n "
                 f"       error={self.err:.17e}, \n"
-                f"        tolerance={self.tol:.17f}, \n"
+                f"        tolerance={self.tol:.0e}, \n"
                 f"        matrix dim={self.dim:.0e}, \n"
-                f"        time={self.tim:.17e} seconds \n"
-                f"        memory usage={self.mem / 1024:.17f} KiloBytes, \n"
-                f"        memory peak={self.mep / 1024:.17f} KiloBytes \n"
+                f"        time={self.tim:.17e} seconds, \n"
+                f"        memory usage={self.mem:.17f} KiloBytes, \n"
+                f"        memory peak={self.mep:.17f} KiloBytes. \n"
                 f")")

@@ -48,7 +48,7 @@ class chart():
 
     @classmethod
     def load_stats(cls, stats_path: str) -> pd.DataFrame:
-        with open('data/computation.json') as f:  # oppure sostituisci con json.loads(...) se il JSON è in formato stringa
+        with open('data/memory computation.json') as f:  # oppure sostituisci con json.loads(...) se il JSON è in formato stringa
             data = json.load(f)
 
         # Prepariamo i dati in una lista di dizionari
@@ -70,7 +70,7 @@ class chart():
 
 
     def make_stats(self):
-        df = self.load_stats("data/computation.json")
+        df = self.load_stats("data/memory computation.json")
 
         mean_df = df.groupby(['method', 'matrix', 'tol']).mean(numeric_only=True).reset_index()
         print(mean_df)

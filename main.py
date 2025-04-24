@@ -175,7 +175,7 @@ def parse_input():
 
 
 
-def main(path, name, solver, tollerance, niteration, nrun, run_charts, statistics, verbose):
+def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics, verbose):
 
     # dataframe che contiene tutti i risultati
     # dei run eseguiti nell'istanza del programma
@@ -187,7 +187,7 @@ def main(path, name, solver, tollerance, niteration, nrun, run_charts, statistic
         # per ogni valore di tolleranza impostato
         # viene caricata la matrice ed eseguiti i
         # solver
-        for tol in tollerance:
+        for tol in tolerance:
 
             # per ciascuna matrice in termini di
             # nome e path
