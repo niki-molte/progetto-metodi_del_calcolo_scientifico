@@ -1,4 +1,5 @@
 import time
+import tracemalloc
 
 import numpy as np
 from numpy._typing import NDArray
@@ -23,6 +24,13 @@ class ConjugatedGradientMethod(IterativeMethods):
         if not conv:
             raise ValueError(msg)
 
+        # inizio a tracciare l'uso della memoria
+        # da parte del metodo ma prima pulisco
+        # gli stack allocati da python
+        tracemalloc.clear_traces()
+        tracemalloc.start()
+
+        # prelevo la size della matrice
         m, n = np.shape(A)
 
         # estrazione della diagonale e calcolo
@@ -76,8 +84,13 @@ class ConjugatedGradientMethod(IterativeMethods):
         # calcolo l'errore dell'ultimo run
         err = self.evaluate_error(x_ex, x_new)
 
+        # ottengo l'uso di memoria da parte del
+        # metodo e reinizializzo
+        usage, peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+
         # salvo le statistiche e genero il valore
         # di ritorno della funzione
-        res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m)
+        res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m, mem=usage, mep=peak)
         self.save_stats(res, "data/computation.json", "conjugated-gradient", matrix_name)
         return res

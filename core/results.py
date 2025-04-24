@@ -8,13 +8,17 @@ class Results:
     _tol: float = field(init=False, repr=False)
     _tim: float = field(init=False, repr=False)
     _dim: int = field(init=False, repr=False)
+    _mem: float = field(init=False, repr=False)
+    _mep: float = field(init=False, repr=False)
 
-    def __init__(self, nit, err, tol, tim, dim):
+    def __init__(self, nit, err, tol, tim, dim, mem, mep):
         self._nit = nit
         self._err = err
         self._tol = tol
         self._tim = tim
         self._dim = dim
+        self._mem = mem
+        self._mep = mep
 
 
     @property
@@ -45,6 +49,7 @@ class Results:
     def tol(self, value: float):
         if not isinstance(value, float) and value < 0:
             raise ValueError("value should be a positive float")
+        self._tol = value
 
     @property
     def tim(self) -> float:
@@ -54,7 +59,7 @@ class Results:
     def tim(self, value: float):
         if not isinstance(value, float) and value < 0:
             raise ValueError("value should be a positive float.")
-        self._tim = float(value)
+        self._tim = value
 
     @property
     def dim(self) -> float:
@@ -64,12 +69,35 @@ class Results:
     def dim(self, value: int):
         if not isinstance(value, int) and value < 0:
             raise ValueError("value should be a positive integer.")
-        self._tim = float(value)
+        self._dim = value
+
+    @property
+    def mem(self) -> float:
+        return self._mem
+
+    @mem.setter
+    def mem(self, value: float):
+        if not isinstance(value, float) and value < 0:
+            raise ValueError("value should be a positive float.")
+        self._mem = value
+
+    @property
+    def mep(self) -> float:
+        return self._mep
+
+    @mep.setter
+    def mep(self, value: float):
+        if not isinstance(value, float) and value < 0:
+            raise ValueError("value should be a positive float.")
+        self._mep = value
 
     def __str__(self) -> str:
-        return f"Results(number of iteration={self.nit}, \n " \
-               f"       error={self.err:.16e}, \n" \
-               f"        tolerance={self.tol:.16e}, \n" \
-               f"        matrix dim={self.dim:.0e}, \n" \
-               f"        time={self.tim:.16} seconds \n" \
-               f")"
+        return (f"Results(\n "
+                f"       number of iteration={self.nit}, \n "
+                f"       error={self.err:.17e}, \n"
+                f"        tolerance={self.tol:.17f}, \n"
+                f"        matrix dim={self.dim:.0e}, \n"
+                f"        time={self.tim:.17e} seconds \n"
+                f"        memory usage={self.mem / 1024:.17f} KiloBytes, \n"
+                f"        memory peak={self.mep / 1024:.17f} KiloBytes \n"
+                f")")

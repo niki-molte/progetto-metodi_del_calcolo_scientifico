@@ -36,12 +36,12 @@ def parse_input():
     # se non viene specificato verranno eseguiti
     # tutti i metodi per risoluzione di sistemi
     arg.add_argument('--method', '-m', nargs='+', type=str, required=False,
-                     default=['jacobi', 'gauss-seidl', 'gradient', 'conjugated gradient'],
+                     default=['jacobi', 'gauss-seidl', 'gradient', 'conjugated-gradient'],
                      help='please specify one or more iterative methods. The supported one are: \n'
                           '    jacobi \n'
                           '    gauss-seidl \n'
                           '    gradient \n'
-                          '    conjugated gradient')
+                          '    conjugated-gradient')
 
     # la tolleranza NON è un argomento obbligatorio,
     # se non viene specificata allora verranno eseguiti
@@ -139,7 +139,7 @@ def parse_input():
             gradient = GradientMethod()
             solvers.append(gradient)
 
-        elif solver == "conjugated gradient":
+        elif solver == "conjugated-gradient":
 
             conjugated_gradient = ConjugatedGradientMethod()
             solvers.append(conjugated_gradient)
