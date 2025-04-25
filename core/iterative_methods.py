@@ -23,7 +23,7 @@ class IterativeMethods(ABC):
 
     @abstractmethod
     def solve(self, A: NDArray[np.float64], b: NDArray[np.float64], x_ex: NDArray[np.float64],
-              n_max: int, toll: float, matrix_name: str) -> Results:
+              n_max: int, toll: float, matrix_name: str, trace_memory: bool) -> Results:
         pass
 
     @staticmethod
@@ -91,7 +91,7 @@ class IterativeMethods(ABC):
         return conv, msg
 
     @staticmethod
-    def save_stats(res: Results, path: str, method_name: str, matrix_name: str):
+    def save_stats(res: Results, path: str, method_name: str, matrix_name: str, trace_memory: bool):
 
         # se il path specificato non esiste viene 
         # lanciata l'eccezione
@@ -103,17 +103,28 @@ class IterativeMethods(ABC):
             data = json.load(f)
 
         # creo il dizionario da salvare
-        matrix_data = {
-            matrix_name: {
-                "niter": res.nit,
-                "err": res.err,
-                "tol": res.tol,
-                "time": res.tim,
-                "dim": res.dim,
-                "memu": res.mem,
-                "memp": res.mep
+        if trace_memory:
+            matrix_data = {
+                matrix_name: {
+                    "niter": res.nit,
+                    "err": res.err,
+                    "tol": res.tol,
+                    "time": res.tim,
+                    "dim": res.dim,
+                    "memu": res.mem,
+                    "memp": res.mep
+                }
             }
-        }
+        else:
+            matrix_data = {
+                matrix_name: {
+                    "niter": res.nit,
+                    "err": res.err,
+                    "tol": res.tol,
+                    "time": res.tim,
+                    "dim": res.dim,
+                }
+            }
 
         # aggiunge i dati nel dizionario
         # corretto

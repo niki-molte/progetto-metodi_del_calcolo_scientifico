@@ -78,11 +78,18 @@ def parse_input():
                      help='If you want some summary charts of all the run set this parameter. '
                           'Default is no stats charts.')
 
+    # NON è obbligatorio specificare se si vuole
+    # tracciare l'uso della memoria, durante l'impiego dei
+    # metodi di risoluzione
+    arg.add_argument('--tracememory', '-tm', required=False, action='store_true',
+                     help='If you want some information about memory usage while the solver methods are running '
+                          'please specify')
+
     # NON è obbligatorio specificare il grado di verbose
     # dell'esecuzione dei metodi, di default è false
     arg.add_argument('--verb', '-v', required=False, action='store_true',
-                     help='If you don\'t want some information when the methods are running please specify '
-                          'this parameter. Default is verbose.')
+                     help='If you want some information when the methods are running please specify '
+                          'this parameter. Default is not verbose.')
 
     # stampa la configurazione che si sta eseguendo
     args_dict = vars(arg.parse_args())
@@ -162,6 +169,10 @@ def parse_input():
     # grafici che contengono le statistiche
     do_stats = args_dict.get('stats')
 
+    # controllo se sarà necessario tracciare
+    # l'uso della memoria
+    trace_memory = args_dict.get('tracememory')
+
     # controllo se andranno prodotti degli
     # output durante l'esecuzione di ogni
     # fase
@@ -171,15 +182,20 @@ def parse_input():
     else:
         print("verbose set to False no information provided")
 
-    return matrix_path, matrix_name, solvers, toll, niter, nrun, do_charts, do_stats, verb
+    return matrix_path, matrix_name, solvers, toll, niter, nrun, do_charts, do_stats, trace_memory, verb
 
 
 
-def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics, verbose):
+def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics, trace_memory, verbose):
 
     # dataframe che contiene tutti i risultati
     # dei run eseguiti nell'istanza del programma
-    res_dataframe = pd.DataFrame(columns=['matrix', 'dim', 'method', 'niter', 'err', 'tol', 'time'])
+    if trace_memory:
+        res_dataframe = pd.DataFrame(columns=['matrix', 'dim', 'method', 'niter', 'error', 'tolerance', 'time',
+                                              'memory usage', 'memory peak usage'])
+    else :
+        res_dataframe = pd.DataFrame(
+            columns=['matrix', 'dim', 'method', 'niter', 'error', 'tolerance', 'time'])
 
     # se è stato specificato il path calcolo la
     # matrice
@@ -208,8 +224,14 @@ def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics
                     # per ciascun numero di run definito
                     # viene iterato il metodo selezionato
                     for r in range(nrun):
-                        res = s.solve(A, b, x_ex, niteration, tol, matrix_name)
-                        res_dataframe.loc[len(res_dataframe)] = [matrix_name, res.dim, s.name, res.nit, res.err, res.tol, res.tim]
+                        res = s.solve(A, b, x_ex, niteration, tol, matrix_name, trace_memory)
+
+                        if trace_memory :
+                            res_dataframe.loc[len(res_dataframe)] = [matrix_name, res.dim, s.name, res.nit, res.err,
+                                                                     res.tol, res.tim, res.mem, res.mep]
+                        else :
+                            res_dataframe.loc[len(res_dataframe)] = [matrix_name, res.dim, s.name, res.nit, res.err,
+                                                                     res.tol, res.tim]
 
                         # se verbose è impostato vengono stampate
                         # tutte i risultati di ciascun run
@@ -218,11 +240,11 @@ def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics
                             print(res.__str__(), '\n')
 
     # grafici se richiesti
-    if do_charts:
+    if run_charts:
         make_charts = chart()
         make_charts.make_run_chart(res_dataframe)
 
-    if do_stats:
+    if statistics:
         make_charts = chart()
         make_charts.make_stats()
         pass
@@ -234,6 +256,6 @@ def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics
 
 
 if __name__ == "__main__":
-    mpath, mname, solvers, toll, niter, nr, do_charts, do_stats, verb = parse_input()
-    main(mpath, mname, solvers, toll, niter, nr, do_charts, do_stats, verb)
+    mpath, mname, solvers, toll, niter, nr, do_charts, do_stats, tracemem, verb = parse_input()
+    main(mpath, mname, solvers, toll, niter, nr, do_charts, do_stats, tracemem, verb)
 

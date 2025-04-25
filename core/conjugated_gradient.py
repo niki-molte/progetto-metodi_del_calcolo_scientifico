@@ -15,7 +15,7 @@ class ConjugatedGradientMethod(IterativeMethods):
         return "conjugated-gradient"
 
     def solve(self, A: NDArray[np.float64], b: NDArray[np.float64], x_ex: NDArray[np.float64], n_max: int, toll: float,
-              matrix_name: str) -> Results:
+              matrix_name: str, trace_memory: bool) -> Results:
 
         # verifica la convergenza del metodo
         # forse meglio spostarla nel main
@@ -27,8 +27,9 @@ class ConjugatedGradientMethod(IterativeMethods):
         # inizio a tracciare l'uso della memoria
         # da parte del metodo ma prima pulisco
         # gli stack allocati da python
-        tracemalloc.clear_traces()
-        tracemalloc.start()
+        if trace_memory:
+            tracemalloc.clear_traces()
+            tracemalloc.start()
 
         # prelevo la size della matrice
         m, n = np.shape(A)
@@ -86,11 +87,16 @@ class ConjugatedGradientMethod(IterativeMethods):
 
         # ottengo l'uso di memoria da parte del
         # metodo e reinizializzo
-        usage, peak = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
+        if trace_memory:
+            usage, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
 
-        # salvo le statistiche e genero il valore
-        # di ritorno della funzione
-        res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m, mem=usage, mep=peak)
-        self.save_stats(res, "data/computation.json", "conjugated-gradient", matrix_name)
+            # salvo le statistiche e genero il valore
+            # di ritorno della funzione
+            res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m, mem=usage, mep=peak)
+
+        else:
+            res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m)
+
+        self.save_stats(res, "data/computation.json", "conjugated-gradient", matrix_name, trace_memory)
         return res
