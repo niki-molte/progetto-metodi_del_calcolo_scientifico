@@ -247,7 +247,7 @@ def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics
     if statistics:
         make_charts = chart()
         make_charts.make_stats()
-        pass
+
 
 
 

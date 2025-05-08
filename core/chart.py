@@ -1,8 +1,11 @@
 import json
 
+import numpy as np
 import seaborn as sns
 
 import matplotlib
+from matplotlib import cm
+
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
@@ -15,43 +18,86 @@ class chart():
     def __init__(self):
         pass
 
-    def make_run_chart(self,  run_stats: pd.DataFrame):
-        fig, axs = plt.subplots(2, 2, figsize=(10, 8))
+    import matplotlib.pyplot as plt
+    import numpy as np
 
-        # Primo subplot
-        sns.scatterplot(data=run_stats, y='niter', x='tol', hue='method', style='matrix', ax=axs[0][0])
-        axs[0][0].set(xlabel="Dimensionalità", ylabel="Iterazione", title="Iterazioni vs Dimensionalità", yscale='log', xscale='log')
+    def make_run_chart(self, run_stats: pd.DataFrame):
+        # Calcolo delle medie
+        mean_df = run_stats.groupby(['method', 'matrix', 'tol'], as_index=False)[
+            ['niter', 'err', 'time', 'memu', 'memp']
+        ].mean()
 
-        # Secondo subplot
-        sns.scatterplot(data=run_stats, y='err', x='tol', hue='method', style='matrix', ax=axs[0][1])
-        axs[0][1].set(xlabel="Dimensionalità", ylabel="Errore", title="Errore vs Dimensionalità", yscale='log', xscale='log')
+        methods = mean_df['method'].unique()
+        tolerances = sorted(mean_df['tol'].unique(), reverse=True) # ordinamento crescente
+        matrices = mean_df['matrix'].unique()
+        bar_width = 0.8 / len(tolerances)
 
-        # Terzo subplot
-        sns.scatterplot(data=run_stats, y='time', x='tol', hue='method', style='matrix', ax=axs[1][0])
-        axs[1][0].set(xlabel="Dimensionalità", ylabel="Tempo", title="Tempo vs Dimensionalità", yscale='log', xscale='log')
+        cmap = cm.get_cmap("viridis", len(tolerances))
+        colors = [cmap(i) for i in range(len(tolerances))]
 
-        # Nascondi il quarto subplot (vuoto)
-        axs[1][1].set_visible(False)
+        metrics = ['niter', 'err', 'time', 'memp']
+        metrics_name = ['Iterazioni', 'Errore', 'Tempo (s)', 'Memoria']
+        titles = ['Iterazioni', 'Errore', 'Tempo (s)', 'Picco di memoria usata (KB)']
 
-        for ax in axs.flat:
-            if ax.get_legend() is not None:
-                ax.get_legend().remove()
+        for matrix in matrices:
+            fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+            axs = axs.flatten()
+            fig.suptitle(f"Statistiche per la matrice: {matrix}", fontsize=16)
 
-        # Prendi handles e labels da uno dei grafici
-        handles, labels = axs[0, 0].get_legend_handles_labels()
+            matrix_df = mean_df[mean_df['matrix'] == matrix]
+            matrix_df = matrix_df.sort_values(by=['tol'], ascending=False)
 
-        # Aggiungi una sola legenda globale nella zona in basso a sinistra
-        fig.legend(handles, labels, loc='outside center', bbox_to_anchor=(0.75, 0.3), fontsize='medium', frameon=True)
+            for i, (metric, title) in enumerate(zip(metrics, titles)):
+                ax = axs[i]
+                x = np.arange(len(methods))
 
-        plt.tight_layout()
-        plt.show()
+                if metric == "memp":
+                    # Disegna solo una barra per metodo
+                    values = []
+                    for method in methods:
+                        row = matrix_df[matrix_df['method'] == method]
+                        if not row.empty:
+                            # Prendi il primo valore disponibile per ogni metodo (tanto sono tutti uguali)
+                            values.append(row[metric].values[0])
+                        else:
+                            values.append(0)
+                    ax.bar(x, values, width=0.6, color='gray')
+                else:
+                    # Ciclo normale su tutte le tolleranze
+                    for j, tol in enumerate(tolerances):
+                        tol_df = matrix_df[matrix_df['tol'] == tol]
+                        values = []
+                        for method in methods:
+                            row = tol_df[tol_df['method'] == method]
+                            if not row.empty:
+                                values.append(row[metric].values[0])
+                            else:
+                                values.append(0)
+                        ax.bar(x + j * bar_width, values, width=bar_width, color=colors[j])
+
+                ax.set_title(title)
+                ax.set_xlabel("Metodo")
+                ax.set_ylabel(metrics_name[i])
+                ax.set_xticks(x + bar_width * (len(tolerances) - 1) / 2 if metric != "memp" else x)
+                ax.set_xticklabels(methods, rotation=45)
+                ax.set_yscale('log')
+
+            # Legenda unica
+            legend_labels = [f"tol={tol:.0e}" for tol in tolerances]
+            fig.legend(legend_labels, loc='lower center', ncol=len(tolerances), title="Tolleranza",
+                       bbox_to_anchor=(0.5, 0.005))
+
+            plt.tight_layout(rect=(0, 0.05, 1, 0.95))  # spazio per titolo e legenda
+            plt.show()
+
 
     @classmethod
     def load_stats(cls, stats_path: str) -> pd.DataFrame:
-        with open('data/memory computation.json') as f:  # oppure sostituisci con json.loads(...) se il JSON è in formato stringa
+        with open(stats_path) as f:  # oppure sostituisci con json.loads(...) se il JSON è in formato stringa
             data = json.load(f)
 
-        # Prepariamo i dati in una lista di dizionari
+        # lista che conterrà tutti i dizionari
+        # che esprimono i dati
         records = []
 
         for method, entries in data.items():
@@ -70,11 +116,11 @@ class chart():
 
 
     def make_stats(self):
-        df = self.load_stats("data/memory computation.json")
+        df_wm = self.load_stats("data/memory computation.json")
+        df_nm = self.load_stats("data/computation.json")
 
-        mean_df = df.groupby(['method', 'matrix', 'tol']).mean(numeric_only=True).reset_index()
-        print(mean_df)
+        df = pd.concat([df_nm, df_wm[['memu', 'memp']]], axis=1)
 
-        self.make_run_chart(mean_df)
+        self.make_run_chart(df)
 
 

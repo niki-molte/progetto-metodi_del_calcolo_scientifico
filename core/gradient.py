@@ -88,5 +88,8 @@ class GradientMethod(IterativeMethods):
         else:
             res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m)
 
-        self.save_stats(res, "data/computation.json", "gradient", matrix_name, trace_memory)
+        if not trace_memory:
+            self.save_stats(res, "data/computation.json", "gradient", matrix_name, trace_memory)
+        else:
+            self.save_stats(res, "data/memory computation.json", "gradient", matrix_name, trace_memory)
         return res
