@@ -117,6 +117,8 @@ class chart():
 
         df = pd.concat([df_nm, df_wm[['memu', 'memu']]], axis=1)
 
+        print(df)
+
         self.make_run_chart(df)
 
 

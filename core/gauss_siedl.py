@@ -4,6 +4,7 @@ import tracemalloc
 
 import numpy as np
 import psutil
+from memory_profiler import memory_usage
 from numpy import tril
 from numpy.typing import NDArray
 
