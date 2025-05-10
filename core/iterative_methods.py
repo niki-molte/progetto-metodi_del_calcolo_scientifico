@@ -112,7 +112,6 @@ class IterativeMethods(ABC):
                     "time": res.tim,
                     "dim": res.dim,
                     "memu": res.mem,
-                    "memp": res.mep
                 }
             }
         else:
@@ -122,7 +121,7 @@ class IterativeMethods(ABC):
                     "err": res.err,
                     "tol": res.tol,
                     "time": res.tim,
-                    "dim": res.dim,
+                    "dim": res.dim
                 }
             }
 

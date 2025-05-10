@@ -18,13 +18,10 @@ class chart():
     def __init__(self):
         pass
 
-    import matplotlib.pyplot as plt
-    import numpy as np
-
     def make_run_chart(self, run_stats: pd.DataFrame):
         # Calcolo delle medie
         mean_df = run_stats.groupby(['method', 'matrix', 'tol'], as_index=False)[
-            ['niter', 'err', 'time', 'memu', 'memp']
+            ['niter', 'err', 'time', 'memu', 'memu']
         ].mean()
 
         methods = mean_df['method'].unique()
@@ -35,9 +32,9 @@ class chart():
         cmap = cm.get_cmap("viridis", len(tolerances))
         colors = [cmap(i) for i in range(len(tolerances))]
 
-        metrics = ['niter', 'err', 'time', 'memp']
-        metrics_name = ['Iterazioni', 'Errore', 'Tempo (s)', 'Memoria']
-        titles = ['Iterazioni', 'Errore', 'Tempo (s)', 'Picco di memoria usata (KB)']
+        metrics = ['niter', 'err', 'time', 'memu']
+        metrics_name = ['Iterazioni', 'Errore', 'Tempo (s)', 'Memoria (MiB)']
+        titles = ['Iterazioni', 'Errore', 'Tempo (s)', 'Memoria usata (MiB)']
 
         for matrix in matrices:
             fig, axs = plt.subplots(2, 2, figsize=(12, 10))
@@ -45,13 +42,12 @@ class chart():
             fig.suptitle(f"Statistiche per la matrice: {matrix}", fontsize=16)
 
             matrix_df = mean_df[mean_df['matrix'] == matrix]
-            matrix_df = matrix_df.sort_values(by=['tol'], ascending=False)
 
             for i, (metric, title) in enumerate(zip(metrics, titles)):
                 ax = axs[i]
                 x = np.arange(len(methods))
 
-                if metric == "memp":
+                if metric == "memu":
                     # Disegna solo una barra per metodo
                     values = []
                     for method in methods:
@@ -78,7 +74,7 @@ class chart():
                 ax.set_title(title)
                 ax.set_xlabel("Metodo")
                 ax.set_ylabel(metrics_name[i])
-                ax.set_xticks(x + bar_width * (len(tolerances) - 1) / 2 if metric != "memp" else x)
+                ax.set_xticks(x + bar_width * (len(tolerances) - 1) / 2 if metric != "memu" else x)
                 ax.set_xticklabels(methods, rotation=45)
                 ax.set_yscale('log')
 
@@ -119,7 +115,7 @@ class chart():
         df_wm = self.load_stats("data/memory computation.json")
         df_nm = self.load_stats("data/computation.json")
 
-        df = pd.concat([df_nm, df_wm[['memu', 'memp']]], axis=1)
+        df = pd.concat([df_nm, df_wm[['memu', 'memu']]], axis=1)
 
         self.make_run_chart(df)
 

@@ -192,7 +192,7 @@ def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics
     # dei run eseguiti nell'istanza del programma
     if trace_memory:
         res_dataframe = pd.DataFrame(columns=['matrix', 'dim', 'method', 'niter', 'error', 'tolerance', 'time',
-                                              'memory usage', 'memory peak usage'])
+                                              'memory usage'])
     else :
         res_dataframe = pd.DataFrame(
             columns=['matrix', 'dim', 'method', 'niter', 'error', 'tolerance', 'time'])
@@ -228,7 +228,7 @@ def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics
 
                         if trace_memory :
                             res_dataframe.loc[len(res_dataframe)] = [matrix_name, res.dim, s.name, res.nit, res.err,
-                                                                     res.tol, res.tim, res.mem, res.mep]
+                                                                     res.tol, res.tim, res.mem]
                         else :
                             res_dataframe.loc[len(res_dataframe)] = [matrix_name, res.dim, s.name, res.nit, res.err,
                                                                      res.tol, res.tim]

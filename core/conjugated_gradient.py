@@ -1,7 +1,10 @@
+import os
 import time
 import tracemalloc
 
 import numpy as np
+import psutil
+from memory_profiler import memory_usage
 from numpy._typing import NDArray
 
 from core.iterative_methods import IterativeMethods
@@ -23,13 +26,6 @@ class ConjugatedGradientMethod(IterativeMethods):
 
         if not conv:
             raise ValueError(msg)
-
-        # inizio a tracciare l'uso della memoria
-        # da parte del metodo ma prima pulisco
-        # gli stack allocati da python
-        if trace_memory:
-            tracemalloc.clear_traces()
-            tracemalloc.start()
 
         # prelevo la size della matrice
         m, n = np.shape(A)
@@ -88,13 +84,11 @@ class ConjugatedGradientMethod(IterativeMethods):
         # ottengo l'uso di memoria da parte del
         # metodo e reinizializzo
         if trace_memory:
-            usage, peak = tracemalloc.get_traced_memory()
-            tracemalloc.stop()
+            usage =  memory_usage(proc=os.getpid(), max_usage=True)
 
-            # salvo le statistiche e genero il valore
-            # di ritorno della funzione
-            res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m, mem=usage, mep=peak)
-
+            # salvo nell'oggetto le
+            # statistiche per il return
+            res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m, mem=usage)
         else:
             res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m)
 

@@ -9,7 +9,6 @@ class Results:
     _tim: float = field(init=False, repr=False)
     _dim: int = field(init=False, repr=False)
     _mem: float = field(init=False, repr=False)
-    _mep: float = field(init=False, repr=False)
     _tracememory: bool = field(default=False, init=False, repr=False)
 
     def __init__(self, nit, err, tol, tim, dim, mem=None, mep=None):
@@ -21,10 +20,9 @@ class Results:
 
         # vengono usati solamente se trace_memory
         # è attivo
-        self.mem = mem / 1024 if mem is not None else 0.0
-        self.mep = mep / 1024 if mep is not None else 0.0
+        self.mem = mem if mem is not None else 0.0
 
-        if not self.mem < 1e-10 and not self.mep < 1e-10:
+        if not self.mem < 1e-10:
             self._tracememory = True
 
 
@@ -107,8 +105,7 @@ class Results:
                     f"        tolerance={self.tol:.0e}, \n"
                     f"        matrix dim={self.dim:.0e}, \n"
                     f"        time={self.tim:.17e} seconds, \n"
-                    f"        memory usage={self.mem:.17f} KiloBytes, \n"
-                    f"        memory peak={self.mep:.17f} KiloBytes. \n"
+                    f"        memory usage={self.mem:.17f} MiB, \n"
                     f")")
         return (f"Results(\n "
                     f"       number of iteration={self.nit}, \n "
