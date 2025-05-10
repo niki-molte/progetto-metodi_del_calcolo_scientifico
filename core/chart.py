@@ -21,7 +21,7 @@ class chart():
     def make_run_chart(self, run_stats: pd.DataFrame):
         # Calcolo delle medie
         mean_df = run_stats.groupby(['method', 'matrix', 'tol'], as_index=False)[
-            ['niter', 'err', 'time', 'memu', 'memu']
+            ['niter', 'err', 'time', 'memu']
         ].mean()
 
         methods = mean_df['method'].unique()
@@ -48,18 +48,22 @@ class chart():
                 x = np.arange(len(methods))
 
                 if metric == "memu":
-                    # Disegna solo una barra per metodo
+                    # ogni metodo rappresentato da una barra
                     values = []
                     for method in methods:
                         row = matrix_df[matrix_df['method'] == method]
                         if not row.empty:
-                            # Prendi il primo valore disponibile per ogni metodo (tanto sono tutti uguali)
-                            values.append(row[metric].values[0])
+                            # viene calcolata la media di tutti i valori di
+                            # memoria usata per ciascuna tolleranza
+                            value = np.mean(row[metric].values[:]) if row[metric].values.size > 0 else 0
+                            values.append(value)
                         else:
                             values.append(0)
+                    print(values)
                     ax.bar(x, values, width=0.6, color='gray')
                 else:
-                    # Ciclo normale su tutte le tolleranze
+                    # permette di creare tutti i grafici relativi
+                    # a tutte le metriche
                     for j, tol in enumerate(tolerances):
                         tol_df = matrix_df[matrix_df['tol'] == tol]
                         values = []
@@ -115,9 +119,7 @@ class chart():
         df_wm = self.load_stats("data/memory computation.json")
         df_nm = self.load_stats("data/computation.json")
 
-        df = pd.concat([df_nm, df_wm[['memu', 'memu']]], axis=1)
-
-        print(df)
+        df = pd.concat([df_nm, df_wm[['memu']]], axis=1)
 
         self.make_run_chart(df)
 
