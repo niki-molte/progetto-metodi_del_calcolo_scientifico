@@ -4,10 +4,12 @@ fonttools==4.57.0
 future==1.0.0
 kiwisolver==1.4.8
 matplotlib==3.10.1
+memory-profiler==0.61.0
 numpy==2.2.5
 packaging==25.0
 pandas==2.2.3
 pillow==11.2.1
+psutil==7.0.0
 pyparsing==3.2.3
 python-dateutil==2.9.0.post0
 pytz==2025.2
@@ -15,5 +17,3 @@ scipy==1.15.2
 seaborn==0.13.2
 six==1.17.0
 tzdata==2025.2
-
-psutil~=7.0.0
