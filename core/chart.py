@@ -110,7 +110,7 @@ class chart():
                     }
                     records.append(record)
 
-        # Creiamo il DataFrame
+        # creiamo il DataFrame
         df = pd.DataFrame(records)
         return df
 
