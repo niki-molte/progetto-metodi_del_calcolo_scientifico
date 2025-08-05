@@ -81,7 +81,7 @@ class IterativeMethods(ABC):
             for i in range(n):
                 diag = abs(A[i, i])
                 off_diag_sum = np.sum(np.abs(A[i, :])) - diag
-                if diag <= off_diag_sum:
+                if diag <= off_diag_sum + 1e-10:
                     print(f"\033[91mThe matrix isn't diagonal dominant, the {name} solver doesn't guarantee convergence.\033[0m")
                     break
 

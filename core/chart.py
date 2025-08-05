@@ -124,21 +124,61 @@ class chart():
 
         self.make_run_chart(df)
 
+
     def spy(self, A: NDArray[np.float64], matrix_name: str) -> None:
 
         density = self.matrix_density(A)
 
         plt.figure(figsize=(7, 7))
-        plt.title(f"{density} density of {matrix_name}")
+        plt.spy(A)
+        plt.title(f"{round(density*100, 5)}% density of {matrix_name}")
         plt.xlabel("Colonne")
         plt.ylabel("Righe")
         plt.grid(False)
         plt.show()
 
+    def barplot_diagonal_dominance(self, matrices: list[NDArray[np.float64]], names: list[str]) -> None:
+        scores = [
+            self.diagonal_dominance_percent(A) * 100
+            for A in matrices
+        ]
+
+        plt.figure(figsize=(8, 5))
+        bars = plt.bar(names, scores, color='steelblue')
+
+        # Aggiunge etichette sopra ogni barra
+        for bar, score in zip(bars, scores):
+            plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
+                     f"{score:.1f}%", ha='center', va='bottom')
+
+        plt.ylim(0, 100)
+        plt.ylabel("Dominanza diagonale (%)")
+        plt.title("Percentuale di righe con dominanza diagonale")
+        plt.grid(axis='y', linestyle='--', alpha=0.5)
+        plt.tight_layout()
+        plt.show()
+
+
+
+    @classmethod
+    def diagonal_dominance_percent(self, A: NDArray[np.float64]) -> float:
+        A = np.array(A)
+        n = A.shape[0]
+        count = 0.0
+
+        for i in range(n):
+            diag = abs(A[i, i])
+            off_diag_sum = np.sum(np.abs(A[i, :])) - diag
+
+            if diag > off_diag_sum + 1e-10:
+                count += 1
+
+        return count / n
+
 
     @classmethod
     def matrix_density(cls, A: NDArray[np.float64]) -> float:
-        nonzero = np.count_nonzero(A)
+        nonzero = np.count_nonzero(np.abs(A) > 1E-10)
         total = A.size
         return nonzero / total
 
