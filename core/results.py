@@ -11,7 +11,7 @@ class Results:
     _mem: float = field(init=False, repr=False)
     _tracememory: bool = field(default=False, init=False, repr=False)
 
-    def __init__(self, nit, err, tol, tim, dim, mem=None, mep=None):
+    def __init__(self, nit, err, tol, tim, dim, mem=None):
         self.nit = nit
         self.err = err
         self.tol = tol
@@ -85,16 +85,6 @@ class Results:
         if not isinstance(value, float) or value < 0:
             raise ValueError("value should be a positive float.")
         self._mem = value
-
-    @property
-    def mep(self) -> float:
-        return self._mep
-
-    @mep.setter
-    def mep(self, value: float):
-        if not isinstance(value, float) and value < 0:
-            raise ValueError("value should be a positive float.")
-        self._mep = value
 
     def __str__(self) -> str:
 

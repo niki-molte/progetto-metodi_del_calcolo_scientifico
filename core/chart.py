@@ -1,7 +1,7 @@
 import json
 
 import numpy as np
-import seaborn as sns
+from numpy.typing import NDArray
 
 import matplotlib
 from matplotlib import cm
@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 pd.set_option('display.max_columns', None)
 
+
 class chart():
 
     def __init__(self):
@@ -20,13 +21,13 @@ class chart():
 
     def make_run_chart(self, run_stats: pd.DataFrame):
         # Calcolo delle medie
-        mean_df = run_stats.groupby(['method', 'matrix', 'tol'], as_index=False)[
+        median_df = run_stats.groupby(['method', 'matrix', 'tol'], as_index=False)[
             ['niter', 'err', 'time', 'memu']
-        ].mean()
+        ].median()
 
-        methods = mean_df['method'].unique()
-        tolerances = sorted(mean_df['tol'].unique(), reverse=True) # ordinamento crescente
-        matrices = mean_df['matrix'].unique()
+        methods = median_df['method'].unique()
+        tolerances = sorted(median_df['tol'].unique(), reverse=True) # ordinamento crescente
+        matrices = median_df['matrix'].unique()
         bar_width = 0.8 / len(tolerances)
 
         cmap = cm.get_cmap("viridis", len(tolerances))
@@ -41,7 +42,7 @@ class chart():
             axs = axs.flatten()
             fig.suptitle(f"Statistiche per la matrice: {matrix}", fontsize=16)
 
-            matrix_df = mean_df[mean_df['matrix'] == matrix]
+            matrix_df = median_df[median_df['matrix'] == matrix]
 
             for i, (metric, title) in enumerate(zip(metrics, titles)):
                 ax = axs[i]
@@ -122,5 +123,24 @@ class chart():
         df = pd.concat([df_nm, df_wm[['memu']]], axis=1)
 
         self.make_run_chart(df)
+
+    def spy(self, A: NDArray[np.float64], matrix_name: str) -> None:
+
+        density = self.matrix_density(A)
+
+        plt.figure(figsize=(7, 7))
+        plt.title(f"{density} density of {matrix_name}")
+        plt.xlabel("Colonne")
+        plt.ylabel("Righe")
+        plt.grid(False)
+        plt.show()
+
+
+    @classmethod
+    def matrix_density(cls, A: NDArray[np.float64]) -> float:
+        nonzero = np.count_nonzero(A)
+        total = A.size
+        return nonzero / total
+
 
 

@@ -43,15 +43,15 @@ class IterativeMethods(ABC):
         return np.array(matrix)
 
     @staticmethod
-    def check_iteration(A: NDArray, x_new: NDArray, b: NDArray) -> np.float64:
+    def check_iteration(A: NDArray[np.float64], x_new: NDArray[np.float64], b: NDArray[np.float64]) -> np.float64:
         return norm(np.dot(A, x_new) - b) / norm(b)
 
     @staticmethod
-    def evaluate_error(x_ex: NDArray, x_new: NDArray) -> np.float64:
+    def evaluate_error(x_ex: NDArray[np.float64], x_new: NDArray[np.float64]) -> np.float64:
         return norm(x_ex - x_new) / norm(x_ex)
 
     @staticmethod
-    def converge(A: NDArray[np.float64]) -> (bool, str):
+    def converge(A: NDArray[np.float64], name: str) -> (bool, str):
         conv = True
         msg = ''
 
@@ -71,22 +71,40 @@ class IterativeMethods(ABC):
             conv = False
             msg = "The entries of the diagonal should be greater than 0.0"
 
-        # se la matrice A non è simmetrica
-        # allora il metodo non è applicabile
-        # rtol è l'errore relativo
-        if not issymmetric(A, rtol=1e-10):
-            conv = False
-            msg = "The input matrix should be symmetric"
+        # per jacobi e gauss-siedel devo verificare
+        # la dominanza diagonale. È una sufficiente
+        # ma non necessaria.
+        if name == 'jacobi' or name == 'gauss-siedel':
+            A = np.array(A)
+            n = m
 
-        # se la matrice A non è definita
-        # positivamente il metodo di risoluzione
-        # non è applicabile. Non eseguo il controllo
-        # sulla simmetria perché l'ho già fatto prima
-        try:
-            cholesky(A, lower=True, check_finite=True)
-        except LinAlgError:
-            conv = False
-            msg = "The input matrix should be positivie defined"
+            for i in range(n):
+                diag = abs(A[i, i])
+                off_diag_sum = np.sum(np.abs(A[i, :])) - diag
+                if diag <= off_diag_sum:
+                    print(f"\033[91mThe matrix isn't diagonal dominant, the {name} solver doesn't guarantee convergence.\033[0m")
+                    break
+
+        # per la convergenza del gradiente va controllata
+        # simmetria e se definita positiva.
+        if name == 'gradient' or name == 'conjugated-gradient':
+
+            # se la matrice A non è simmetrica
+            # allora il metodo non è applicabile
+            # rtol è l'errore relativo
+            if not issymmetric(A, rtol=1e-10):
+                conv = False
+                msg = "The input matrix should be symmetric"
+
+            # se la matrice A non è definita
+            # positivamente il metodo di risoluzione
+            # non è applicabile. Non eseguo il controllo
+            # sulla simmetria perché l'ho già fatto prima
+            try:
+                cholesky(A, lower=True, check_finite=True)
+            except LinAlgError:
+                conv = False
+                msg = "The input matrix should be positive defined"
 
         return conv, msg
 

@@ -22,22 +22,13 @@ class ConjugatedGradientMethod(IterativeMethods):
 
         # verifica la convergenza del metodo
         # forse meglio spostarla nel main
-        conv, msg = self.converge(A)
+        conv, msg = self.converge(A, 'conjugated-gradient')
 
         if not conv:
             raise ValueError(msg)
 
         # prelevo la size della matrice
         m, n = np.shape(A)
-
-        # estrazione della diagonale e calcolo
-        # della sua inversa
-        D = np.diag(np.diag(A))
-        invD = np.diag(1 / np.diag(A))
-
-        # calcolo la decomposizione LU
-        # sottraendo D ad A
-        B = D - A
 
         # creo il vettore che rappresenta la
         # soluzione iniziale del sistema

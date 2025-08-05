@@ -27,7 +27,7 @@ class JacobiMethod(IterativeMethods):
 
         # verifica la convergenza del metodo
         # forse meglio spostarla nel main
-        conv, msg = self.converge(A)
+        conv, msg = self.converge(A, 'jacobi')
 
         if not conv:
             raise ValueError(msg)
