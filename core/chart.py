@@ -125,17 +125,59 @@ class chart():
         self.make_run_chart(df)
 
 
+    def single_stats_solver(self):
+        df_wm = self.load_stats("data/memory computation.json")
+        df_nm = self.load_stats("data/computation.json")
+
+        df = pd.concat([df_nm, df_wm[['memu']]], axis=1)
+
+        # dataframe con i valori mediani.
+        grouped = df.groupby(["method", "matrix", "tol"]).median(numeric_only=True).reset_index()
+
+        tolleranze = [1e-4, 1e-6, 1e-8, 1e-10]
+
+        for solver in grouped["method"].unique():
+            for tol in tolleranze:
+                df_plot = grouped[(grouped["method"] == solver) & (grouped["tol"] == tol)]
+
+                if df_plot.empty:
+                    continue
+
+                fig, ax = plt.subplots(figsize=(10, 6))
+                width = 0.2
+                x = range(len(df_plot))
+
+                ax.bar([i - 1.5 * width for i in x], df_plot["niter"], width=width, label="Iterazioni")
+                ax.bar([i - 0.5 * width for i in x], df_plot["time"], width=width, label="Tempo (s)")
+                ax.bar([i + 0.5 * width for i in x], df_plot["err"], width=width, label="Errore")
+                ax.bar([i + 1.5 * width for i in x], df_plot["memu"], width=width, label="Memoria (MB)")
+
+                ax.set_xticks(x)
+                ax.set_xticklabels(df_plot["matrix"])
+                ax.set_title(f"{solver} – Tolleranza = {tol:.0e}")
+                ax.legend()
+                ax.set_ylabel("Valori")
+                ax.set_xlabel("Matrice")
+
+                ax.set_yscale('log')
+
+                plt.tight_layout()
+                plt.show()
+
+
+
     def spy(self, A: NDArray[np.float64], matrix_name: str) -> None:
 
         density = self.matrix_density(A)
 
         plt.figure(figsize=(7, 7))
         plt.spy(A)
-        plt.title(f"{round(density*100, 5)}% density of {matrix_name}")
+        plt.title(f"{round(density*100, 5)}% densità di {matrix_name}")
         plt.xlabel("Colonne")
         plt.ylabel("Righe")
         plt.grid(False)
         plt.show()
+
 
     def barplot_diagonal_dominance(self, matrices: list[NDArray[np.float64]], names: list[str]) -> None:
         scores = [

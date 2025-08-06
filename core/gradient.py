@@ -31,15 +31,6 @@ class GradientMethod(IterativeMethods):
 
         m, n = np.shape(A)
 
-        # estrazione della diagonale e calcolo
-        # della sua inversa
-        D = np.diag(np.diag(A))
-        invD = np.diag(1 / np.diag(A))
-
-        # calcolo la decomposizione LU
-        # sottraendo D ad A
-        B = D - A
-
         # creo il vettore che rappresenta la
         # soluzione iniziale del sistema
         x_old = np.zeros(shape=(m, 1))

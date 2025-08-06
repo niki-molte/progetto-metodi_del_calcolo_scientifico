@@ -47,7 +47,7 @@ class ConjugatedGradientMethod(IterativeMethods):
 
         start = time.time()
 
-        # applico il metodo di jacobi per calcolare la
+        # applico il metodo del gradiente coniugato per calcolare la
         # soluzione del sistema.
         while self.check_iteration(A, x_new, b) > toll and nit < n_max:
             k = np.dot(p_old.T, r_old) / np.dot(p_old.T, np.dot(A, p_old))
