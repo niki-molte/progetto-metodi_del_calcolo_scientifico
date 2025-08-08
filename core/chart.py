@@ -8,6 +8,7 @@ from matplotlib import cm
 
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 
 import pandas as pd
@@ -124,45 +125,81 @@ class chart():
 
         self.make_run_chart(df)
 
-
     def single_stats_solver(self):
+        # Caricamento dei dati
         df_wm = self.load_stats("data/memory computation.json")
         df_nm = self.load_stats("data/computation.json")
 
         df = pd.concat([df_nm, df_wm[['memu']]], axis=1)
 
-        # dataframe con i valori mediani.
+        # Calcolo delle mediane
         grouped = df.groupby(["method", "matrix", "tol"]).median(numeric_only=True).reset_index()
 
-        tolleranze = [1e-4, 1e-6, 1e-8, 1e-10]
+        tolerances = [1e-4, 1e-6, 1e-8, 1e-10]
+        resources = ["niter", "time", "err", "memu"]
+        titles = {
+            "niter": "Numero di Iterazioni",
+            "time": "Tempo di esecuzione (s)",
+            "err": "Errore",
+            "memu": "Memoria (MB)"
+        }
+
+        # Colori dalla colormap viridis
+        cmap = cm.get_cmap("viridis", len(tolerances))
+        tol_colors = {tol: cmap(i) for i, tol in enumerate(tolerances)}
 
         for solver in grouped["method"].unique():
-            for tol in tolleranze:
-                df_plot = grouped[(grouped["method"] == solver) & (grouped["tol"] == tol)]
+            fig, axs = plt.subplots(2, 2, figsize=(14, 10))
+            axs = axs.flatten()
 
-                if df_plot.empty:
-                    continue
+            data_solver = grouped[grouped["method"] == solver]
+            matrices = data_solver["matrix"].unique()
+            x = np.arange(len(matrices))
+            bar_width = 0.15
 
-                fig, ax = plt.subplots(figsize=(10, 6))
-                width = 0.2
-                x = range(len(df_plot))
+            for i, resource in enumerate(resources):
+                ax = axs[i]
+                shift = -1.5  # reset shift per subplot
 
-                ax.bar([i - 1.5 * width for i in x], df_plot["niter"], width=width, label="Iterazioni")
-                ax.bar([i - 0.5 * width for i in x], df_plot["time"], width=width, label="Tempo (s)")
-                ax.bar([i + 0.5 * width for i in x], df_plot["err"], width=width, label="Errore")
-                ax.bar([i + 1.5 * width for i in x], df_plot["memu"], width=width, label="Memoria (MB)")
+                for j, tol in enumerate(tolerances):
+                    df_plot = data_solver[data_solver["tol"] == tol]
+                    heights = []
 
+                    for matrix in matrices:
+                        row = df_plot[df_plot["matrix"] == matrix]
+                        if not row.empty:
+                            heights.append(row[resource].values[0])
+                        else:
+                            heights.append(np.nan)
+
+                    ax.bar(x + shift * bar_width, heights,
+                           width=bar_width,
+                           color=tol_colors[tol])
+                    shift += 1
+
+                ax.set_title(titles[resource])
                 ax.set_xticks(x)
-                ax.set_xticklabels(df_plot["matrix"])
-                ax.set_title(f"{solver} – Tolleranza = {tol:.0e}")
-                ax.legend()
-                ax.set_ylabel("Valori")
-                ax.set_xlabel("Matrice")
-
+                ax.set_xticklabels(matrices)
                 ax.set_yscale('log')
+                ax.set_ylabel(titles[resource])
 
-                plt.tight_layout()
-                plt.show()
+            # Legenda manuale (globale) — creata dopo tight_layout
+            legend_patches = [
+                mpatches.Patch(color=tol_colors[tol], label=f"tol={tol:.0e}")
+                for tol in tolerances
+            ]
+
+            fig.suptitle(f"Statistiche per il solver: {solver}", fontsize=16)
+            plt.tight_layout(rect=[0, 0.1, 1, 0.95])  # Lascia spazio sotto
+
+            # Aggiunta legenda fuori dalla griglia
+            fig.legend(handles=legend_patches,
+                       loc="lower center",
+                       ncol=4,
+                       bbox_to_anchor=(0.5, 0.02),
+                       bbox_transform=fig.transFigure)
+
+            plt.show()
 
 
 
