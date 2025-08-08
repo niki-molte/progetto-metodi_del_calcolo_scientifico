@@ -138,13 +138,13 @@ class chart():
         self.make_run_chart(df)
 
     def single_stats_solver(self):
-        # Caricamento dei dati
+        # carico i dati
         df_wm = self.load_stats("data/memory computation.json")
         df_nm = self.load_stats("data/computation.json")
 
         df = pd.concat([df_nm, df_wm[['memu']]], axis=1)
 
-        # Calcolo delle mediane
+        # calcolo della mediana
         grouped = df.groupby(["method", "matrix", "tol"]).median(numeric_only=True).reset_index()
 
         tolerances = [1e-4, 1e-6, 1e-8, 1e-10]
@@ -156,7 +156,7 @@ class chart():
             "memu": "Memoria (MB)"
         }
 
-        # Colori dalla colormap viridis
+        # color map definita
         cmap = cm.get_cmap("viridis", len(tolerances))
         tol_colors = {tol: cmap(i) for i, tol in enumerate(tolerances)}
 
@@ -195,7 +195,7 @@ class chart():
                 ax.set_yscale('log')
                 ax.set_ylabel(titles[resource])
 
-            # Legenda manuale (globale) — creata dopo tight_layout
+            # creazione legenda
             legend_patches = [
                 mpatches.Patch(color=tol_colors[tol], label=f"tol={tol:.0e}")
                 for tol in tolerances
@@ -204,7 +204,7 @@ class chart():
             fig.suptitle(f"Statistiche per il solver: {solver}", fontsize=16)
             plt.tight_layout(rect=[0, 0.1, 1, 0.95])  # Lascia spazio sotto
 
-            # Aggiunta legenda fuori dalla griglia
+            # legenda fuori grafico
             fig.legend(handles=legend_patches,
                        loc="lower center",
                        ncol=4,
@@ -237,7 +237,7 @@ class chart():
         plt.figure(figsize=(8, 5))
         bars = plt.bar(names, scores, color='steelblue')
 
-        # Aggiunge etichette sopra ogni barra
+        # posizinoamento etichette
         for bar, score in zip(bars, scores):
             plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
                      f"{score:.1f}%", ha='center', va='bottom')
