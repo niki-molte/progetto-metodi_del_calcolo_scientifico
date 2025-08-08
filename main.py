@@ -191,11 +191,11 @@ def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics
     # dataframe che contiene tutti i risultati
     # dei run eseguiti nell'istanza del programma
     if trace_memory:
-        res_dataframe = pd.DataFrame(columns=['matrix', 'dim', 'method', 'niter', 'error', 'tolerance', 'time',
-                                              'memory usage'])
+        res_dataframe = pd.DataFrame(columns=['matrix', 'dim', 'method', 'niter', 'err', 'tol', 'time',
+                                              'memu'])
     else :
         res_dataframe = pd.DataFrame(
-            columns=['matrix', 'dim', 'method', 'niter', 'error', 'tolerance', 'time'])
+            columns=['matrix', 'dim', 'method', 'niter', 'err', 'tol', 'time'])
 
     # se è stato specificato il path calcolo la
     # matrice
@@ -242,7 +242,7 @@ def main(path, name, solver, tolerance, niteration, nrun, run_charts, statistics
     # grafici se richiesti
     if run_charts:
         make_charts = chart()
-        make_charts.make_run_chart(res_dataframe)
+        make_charts.make_run_chart(res_dataframe, trace_memory)
 
     if statistics:
         make_charts = chart()

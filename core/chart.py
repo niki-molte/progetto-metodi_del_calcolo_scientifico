@@ -20,11 +20,17 @@ class chart():
     def __init__(self):
         pass
 
-    def make_run_chart(self, run_stats: pd.DataFrame):
-        # Calcolo delle medie
-        median_df = run_stats.groupby(['method', 'matrix', 'tol'], as_index=False)[
-            ['niter', 'err', 'time', 'memu']
-        ].median()
+    def make_run_chart(self, run_stats: pd.DataFrame, trace_memory=False):
+
+        if trace_memory:
+            median_df = run_stats.groupby(['method', 'matrix', 'tol'], as_index=False)[
+                ['niter', 'err', 'time', 'memu']
+            ].median()
+        else:
+            median_df = run_stats.groupby(['method', 'matrix', 'tol'], as_index=False)[
+                ['niter', 'err', 'time']
+            ].median()
+
 
         methods = median_df['method'].unique()
         tolerances = sorted(median_df['tol'].unique(), reverse=True) # ordinamento crescente
@@ -34,13 +40,21 @@ class chart():
         cmap = cm.get_cmap("viridis", len(tolerances))
         colors = [cmap(i) for i in range(len(tolerances))]
 
-        metrics = ['niter', 'err', 'time', 'memu']
+        if trace_memory:
+            metrics = ['niter', 'err', 'time', 'memu']
+        else:
+            metrics = ['niter', 'err', 'time']
+
         metrics_name = ['Iterazioni', 'Errore', 'Tempo (s)', 'Memoria (MiB)']
         titles = ['Iterazioni', 'Errore', 'Tempo (s)', 'Memoria usata (MiB)']
 
         for matrix in matrices:
             fig, axs = plt.subplots(2, 2, figsize=(12, 10))
             axs = axs.flatten()
+
+            if not trace_memory:
+                axs[3].set_visible(False)
+
             fig.suptitle(f"Statistiche per la matrice: {matrix}", fontsize=16)
 
             matrix_df = median_df[median_df['matrix'] == matrix]
@@ -57,7 +71,7 @@ class chart():
                         if not row.empty:
                             # viene calcolata la media di tutti i valori di
                             # memoria usata per ciascuna tolleranza
-                            value = np.mean(row[metric].values[:]) if row[metric].values.size > 0 else 0
+                            value = np.median(row[metric].values[:]) if row[metric].values.size > 0 else 0
                             values.append(value)
                         else:
                             values.append(0)
@@ -83,7 +97,6 @@ class chart():
                 ax.set_xticklabels(methods, rotation=45)
                 ax.set_yscale('log')
 
-            # Legenda unica
             legend_labels = [f"tol={tol:.0e}" for tol in tolerances]
             fig.legend(legend_labels, loc='lower center', ncol=len(tolerances), title="Tolleranza",
                        bbox_to_anchor=(0.5, 0.005))
