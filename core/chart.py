@@ -61,7 +61,6 @@ class chart():
                             values.append(value)
                         else:
                             values.append(0)
-                    print(values)
                     ax.bar(x, values, width=0.6, color='gray')
                 else:
                     # permette di creare tutti i grafici relativi

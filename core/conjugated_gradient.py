@@ -49,12 +49,12 @@ class ConjugatedGradientMethod(IterativeMethods):
         # soluzione del sistema.
         while self.check_iteration(A, x_new, b) > toll and nit < n_max:
             k = np.dot(p_old.T, r_old) / np.dot(p_old.T, np.dot(A, p_old))
-            x_new = x_old + (k * p_old)
+            x_new = x_old + k * p_old
 
-            r_new = r_old - (k * np.dot(A, p_old))
+            r_new = r_old - k * np.dot(A, p_old)
             beta = np.dot((np.dot(A, p_old)).T, r_new) / np.dot(np.dot(A, p_old).T, p_old)
 
-            p_new = r_new - (beta * p_old)
+            p_new = r_new - beta * p_old
 
             x_old = x_new
             r_old = r_new
