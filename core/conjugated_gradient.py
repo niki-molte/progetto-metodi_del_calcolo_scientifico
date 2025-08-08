@@ -43,8 +43,6 @@ class ConjugatedGradientMethod(IterativeMethods):
         # per limitarle
         nit = 0
 
-        beta = 0
-
         start = time.time()
 
         # applico il metodo del gradiente coniugato per calcolare la
@@ -53,7 +51,7 @@ class ConjugatedGradientMethod(IterativeMethods):
             k = np.dot(p_old.T, r_old) / np.dot(p_old.T, np.dot(A, p_old))
             x_new = x_old + (k * p_old)
 
-            r_new = r_old - (k * (np.dot(A, p_old)))
+            r_new = r_old - (k * np.dot(A, p_old))
             beta = np.dot((np.dot(A, p_old)).T, r_new) / np.dot(np.dot(A, p_old).T, p_old)
 
             p_new = r_new - (beta * p_old)
