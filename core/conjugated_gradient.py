@@ -1,7 +1,10 @@
+import os
 import time
 import tracemalloc
 
 import numpy as np
+import psutil
+from memory_profiler import memory_usage
 from numpy._typing import NDArray
 
 from core.iterative_methods import IterativeMethods
@@ -19,29 +22,13 @@ class ConjugatedGradientMethod(IterativeMethods):
 
         # verifica la convergenza del metodo
         # forse meglio spostarla nel main
-        conv, msg = self.converge(A)
+        conv, msg = self.converge(A, 'conjugated-gradient')
 
         if not conv:
             raise ValueError(msg)
 
-        # inizio a tracciare l'uso della memoria
-        # da parte del metodo ma prima pulisco
-        # gli stack allocati da python
-        if trace_memory:
-            tracemalloc.clear_traces()
-            tracemalloc.start()
-
         # prelevo la size della matrice
         m, n = np.shape(A)
-
-        # estrazione della diagonale e calcolo
-        # della sua inversa
-        D = np.diag(np.diag(A))
-        invD = np.diag(1 / np.diag(A))
-
-        # calcolo la decomposizione LU
-        # sottraendo D ad A
-        B = D - A
 
         # creo il vettore che rappresenta la
         # soluzione iniziale del sistema
@@ -60,7 +47,7 @@ class ConjugatedGradientMethod(IterativeMethods):
 
         start = time.time()
 
-        # applico il metodo di jacobi per calcolare la
+        # applico il metodo del gradiente coniugato per calcolare la
         # soluzione del sistema.
         while self.check_iteration(A, x_new, b) > toll and nit < n_max:
             k = np.dot(p_old.T, r_old) / np.dot(p_old.T, np.dot(A, p_old))
@@ -88,13 +75,11 @@ class ConjugatedGradientMethod(IterativeMethods):
         # ottengo l'uso di memoria da parte del
         # metodo e reinizializzo
         if trace_memory:
-            usage, peak = tracemalloc.get_traced_memory()
-            tracemalloc.stop()
+            usage =  memory_usage(proc=os.getpid(), max_usage=True)
 
-            # salvo le statistiche e genero il valore
-            # di ritorno della funzione
-            res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m, mem=usage, mep=peak)
-
+            # salvo nell'oggetto le
+            # statistiche per il return
+            res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m, mem=usage)
         else:
             res = Results(nit=nit, err=err, tim=elapsed_time, tol=toll, dim=m)
 
