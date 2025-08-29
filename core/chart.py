@@ -138,6 +138,7 @@ class chart():
         self.make_run_chart(df)
 
     def single_stats_solver(self):
+
         # carico i dati
         df_wm = self.load_stats("data/memory computation.json")
         df_nm = self.load_stats("data/computation.json")
