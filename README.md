@@ -1,5 +1,3 @@
-# Ui Yolo Dataset
-
 # Progetto Metodi del Calcolo Scientifico — progetto 1 alternativo
 
 Questo progetto analizza il comportamento dei solver iterativi (Jacobi, Gauss-Seidel, Gradiente e Gradiente coniugato) applicati su differenti matrici contenute nella directory ```/matrix/```.
